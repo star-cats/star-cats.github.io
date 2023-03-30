@@ -1,0 +1,63 @@
+/*
+ * ----- BEGIN BOILERPLATE -----
+ * I dont know why or how half of this is important, but some smart people thought it was, so here we go
+ * see: https://blog.logrocket.com/what-should-modern-css-boilerplate-look-like/
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+}
+
+html {
+  /* font-size: 62.5%; */ /* (62.5/100) * 16px = 10px */
+  /* ^-- uncomment if/when i start using rem font sizes */
+  -webkit-text-size-adjust: none; /* for iOS Safari */
+  text-size-adjust: none; /* for other mobile browsers */
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+label,
+button,
+select,
+summary,
+[type='radio'],
+[type='submit'],
+[type='checkbox'] {
+  cursor: pointer;
+}
+
+/*
+ * ----- END BOILERPLATE -----
+ */
+/*
+ * I don't know where I picked this up, but on macOS it makes the fonts look really delicious in a very subtle way, and
+ * we like subtle delicious. More of that, please.
+ */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/*
+ * Also you KNOW people are gonna have good fonts installed, so lets give those a shot if they got 'em. Times New Roman
+ * is timeless, but Courier New is just tired.
+ */
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+}
