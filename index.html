@@ -2,9 +2,7 @@
 <html>
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>*cats</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>✳</text></svg>">
 <style>
   html, body { margin: 0; overflow: hidden; background: black; width: 100%; height: 100%; }
   #container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
@@ -36,10 +34,11 @@
 </head>
 <body>
 <div id="container"></div>
+<div id="container"></div>
 <div id="overlay">
   <p>*cats (pronounced star-cats) is a perennial clowder of 50 (median, σ=9.84) human-kitties.
 
-We will be at Burning Man 2026.
+We will be at Burning Man 2026.   
 </p>
 </div>
 <script>
@@ -77,6 +76,7 @@ function computeLevels(t) {
 
   const logS = Math.log(Math.max(S_x, S_y, 1.01));
   const kMax = Math.ceil(Math.log(2 * Math.max(W, H)) / logS) + 2;
+  console.log(kMax);
   const levels = [];
   let sx = sx_0, sy = sy_0, tx = tx_0, ty = ty_0;
 
@@ -91,6 +91,7 @@ function computeLevels(t) {
   return levels;
 }
 
+function renderFrame(t, container, screenW, screenH) {
 function renderFrame(t, container, screenW, screenH) {
   const levels = computeLevels(t);
 
@@ -158,11 +159,13 @@ function init() {
   const wMatch = svgText.match(/width="([0-9.]+)"/);
   const hMatch = svgText.match(/height="([0-9.]+)"/);
   const vbMatch = svgText.match(/viewBox="([^"]*)"/);
-  let vbW = 0, vbH = 0;
   if (vbMatch) {
-    const parts = vbMatch[1].split(/\s+/).map(Number);
-    vbW = parts[2]; vbH = parts[3];
+    [vbX, vbY, vbW, vbH] = vbMatch[1].split(/\s+/).map(Number);
   }
+
+  // Parse width/height (fall back to viewBox dimensions)
+  const wMatch = svgText.match(/width="([0-9.]+)"/);
+  const hMatch = svgText.match(/height="([0-9.]+)"/);
   W = wMatch ? parseFloat(wMatch[1]) : vbW;
   H = hMatch ? parseFloat(hMatch[1]) : vbH;
 
@@ -176,6 +179,7 @@ function init() {
 
   const container = document.getElementById('container');
   let startTime = null;
+
 
   function loop(timestamp) {
     if (!startTime) startTime = timestamp;
