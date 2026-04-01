@@ -92,7 +92,6 @@ function computeLevels(t) {
 }
 
 function renderFrame(t, container, screenW, screenH) {
-function renderFrame(t, container, screenW, screenH) {
   const levels = computeLevels(t);
 
   const scaleX = screenW / W;
@@ -159,13 +158,11 @@ function init() {
   const wMatch = svgText.match(/width="([0-9.]+)"/);
   const hMatch = svgText.match(/height="([0-9.]+)"/);
   const vbMatch = svgText.match(/viewBox="([^"]*)"/);
+  let vbW = 0, vbH = 0;
   if (vbMatch) {
-    [vbX, vbY, vbW, vbH] = vbMatch[1].split(/\s+/).map(Number);
+    const parts = vbMatch[1].split(/\s+/).map(Number);
+    vbW = parts[2]; vbH = parts[3];
   }
-
-  // Parse width/height (fall back to viewBox dimensions)
-  const wMatch = svgText.match(/width="([0-9.]+)"/);
-  const hMatch = svgText.match(/height="([0-9.]+)"/);
   W = wMatch ? parseFloat(wMatch[1]) : vbW;
   H = hMatch ? parseFloat(hMatch[1]) : vbH;
 
@@ -173,9 +170,11 @@ function init() {
   S_y = H / INNER_H;
 
   // Parse SVG into a DOM element for cloning (inline SVGs render as vectors in all browsers)
-  const parser = new DOMParser();
-  const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
-  svgTemplate = svgDoc.documentElement;
+  // Strip XML declaration and use innerHTML — more forgiving than DOMParser with namespaces
+  const cleanSvg = svgText.replace(/<\?xml[^?]*\?>\s*/, '');
+  const tmp = document.createElement('div');
+  tmp.innerHTML = cleanSvg;
+  svgTemplate = tmp.querySelector('svg');
 
   const container = document.getElementById('container');
   let startTime = null;
