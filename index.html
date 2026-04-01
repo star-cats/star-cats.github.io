@@ -12,7 +12,7 @@
     position: absolute;
     overflow: hidden;
   }
-  .level-wrap img {
+  .level-wrap svg {
     position: absolute;
   }
   #overlay {
@@ -54,8 +54,8 @@ const LOOP_DURATION = 10;
 // ── Globals ────────────────────────────────────────────────────
 let W = 0, H = 0;
 let S_x = 0, S_y = 0;
-let svgBlobUrl = null;
-const pool = [];       // reusable {wrap, img} elements
+let svgTemplate = null; // parsed SVG DOM element used as clone source
+const pool = [];        // reusable {wrap, svg} elements
 const MAX_POOL = 20;
 
 function computeLevels(t) {
@@ -104,11 +104,11 @@ function renderFrame(t, container, screenW, screenH) {
   while (pool.length < levels.length && pool.length < MAX_POOL) {
     const wrap = document.createElement('div');
     wrap.className = 'level-wrap';
-    const img = document.createElement('img');
-    img.src = svgBlobUrl;
-    wrap.appendChild(img);
+    const svg = svgTemplate.cloneNode(true);
+    svg.style.position = 'absolute';
+    wrap.appendChild(svg);
     container.appendChild(wrap);
-    pool.push({ wrap, img });
+    pool.push({ wrap, svg });
   }
 
   let i = 0;
@@ -121,7 +121,7 @@ function renderFrame(t, container, screenW, screenH) {
     const vpY2 = Math.min(H, ty + sy * H);
     if (vpX2 - vpX1 < 1 || vpY2 - vpY1 < 1) continue;
 
-    const { wrap, img } = pool[i];
+    const { wrap, svg } = pool[i];
 
     // Wrapper = the clipped viewport region on screen
     const wLeft = offsetX + vpX1 * scale;
@@ -133,15 +133,15 @@ function renderFrame(t, container, screenW, screenH) {
       'left:' + wLeft + 'px;top:' + wTop + 'px;' +
       'width:' + wWidth + 'px;height:' + wHeight + 'px';
 
-    // The full SVG image, scaled to this level's size on screen
-    const imgW = sx * W * scale;
-    const imgH = sy * H * scale;
-    const imgLeft = (tx - vpX1) * scale;
-    const imgTop = (ty - vpY1) * scale;
+    // The inline SVG, scaled to this level's size on screen
+    const svgW = sx * W * scale;
+    const svgH = sy * H * scale;
+    const svgLeft = (tx - vpX1) * scale;
+    const svgTop = (ty - vpY1) * scale;
 
-    img.style.cssText = 'position:absolute;' +
-      'left:' + imgLeft + 'px;top:' + imgTop + 'px;' +
-      'width:' + imgW + 'px;height:' + imgH + 'px';
+    svg.style.cssText = 'position:absolute;' +
+      'left:' + svgLeft + 'px;top:' + svgTop + 'px;' +
+      'width:' + svgW + 'px;height:' + svgH + 'px';
 
     i++;
   }
@@ -169,9 +169,10 @@ function init() {
   S_x = W / INNER_W;
   S_y = H / INNER_H;
 
-  // Create a single Blob URL for the SVG (vector, renders crisp at any size)
-  const blob = new Blob([svgText], { type: 'image/svg+xml;charset=utf-8' });
-  svgBlobUrl = URL.createObjectURL(blob);
+  // Parse SVG into a DOM element for cloning (inline SVGs render as vectors in all browsers)
+  const parser = new DOMParser();
+  const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+  svgTemplate = svgDoc.documentElement;
 
   const container = document.getElementById('container');
   let startTime = null;
