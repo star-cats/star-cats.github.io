@@ -44,12 +44,20 @@ const INNER_W = 16;
 const INNER_H = 16;
 const LOOP_DURATION = 10;
 
-// ── Globals ────────────────────────────────────────────────────
-let W = 0, H = 0;
-let S_x = 0, S_y = 0;
-let paths = [];   // [{path2d, fill, opacity}] parsed from the SVG, in paint order
+// ── Functional helpers ─────────────────────────────────────────
+const pipe = (...fns) => x => fns.reduce((acc, fn) => fn(acc), x);
 
-function computeLevels(t) {
+// Build a list from a seed: fn(seed) returns [value, nextSeed] or null to stop.
+const unfold = (fn, seed) => {
+  const step = (acc, s) => {
+    const pair = fn(s);
+    return pair === null ? acc : step([...acc, pair[0]], pair[1]);
+  };
+  return step([], seed);
+};
+
+// ── Geometry ───────────────────────────────────────────────────
+const computeLevels = ({ W, H, S_x, S_y }) => t => {
   const iw = W / S_x;
   const ih = H / S_y;
 
@@ -63,99 +71,107 @@ function computeLevels(t) {
 
   const sx_0 = sx_1 * W / iw;
   const sy_0 = sy_1 * H / ih;
-  const tx_0 = tx_1 - sx_0 * INNER_X;
-  const ty_0 = ty_1 - sy_0 * INNER_Y;
 
-  const logS = Math.log(Math.max(S_x, S_y, 1.01));
-  const kMax = Math.ceil(Math.log(2 * Math.max(W, H)) / logS) + 2;
-  const levels = [];
-  let sx = sx_0, sy = sy_0, tx = tx_0, ty = ty_0;
+  // Each level nests inside the previous one's inner rect; unfold until
+  // a level shrinks below half a pixel.
+  const nest = ({ sx, sy, tx, ty }) => ({
+    sx: sx * iw / W,
+    sy: sy * ih / H,
+    tx: sx * INNER_X + tx,
+    ty: sy * INNER_Y + ty,
+  });
 
-  for (let k = 0; k <= kMax; k++) {
-    if (Math.max(sx * W, sy * H) < 0.5) break;
-    levels.push({ sx, sy, tx, ty });
-    tx = sx * INNER_X + tx;
-    ty = sy * INNER_Y + ty;
-    sx = sx * iw / W;
-    sy = sy * ih / H;
-  }
-  return levels;
-}
+  return unfold(
+    level => Math.max(level.sx * W, level.sy * H) < 0.5
+      ? null
+      : [level, nest(level)],
+    {
+      sx: sx_0,
+      sy: sy_0,
+      tx: tx_1 - sx_0 * INNER_X,
+      ty: ty_1 - sy_0 * INNER_Y,
+    }
+  );
+};
 
+// ── Rendering ──────────────────────────────────────────────────
 // Everything is drawn as canvas paths: resolution-independent (stays sharp at
 // any zoom, like the SVG did), but with no DOM layout, no compositor
 // pixel-snapping, and — unlike <svg> elements — no synchronous re-raster when
 // a layer's backing size changes, which was the source of the periodic hitch.
-function renderFrame(t, canvas, ctx, screenW, screenH, dpr) {
-  const levels = computeLevels(t);
-
+const renderFrame = ({ geometry, paths, canvas, ctx }) => (t, screenW, screenH, dpr) => {
+  const { W, H } = geometry;
   const scale = Math.max(screenW / W, screenH / H);
   const offsetX = (screenW - W * scale) / 2;
   const offsetY = (screenH - H * scale) / 2;
 
+  const toScreenRect = ({ sx, sy, tx, ty }) => ({
+    sx, sy,
+    x: offsetX + tx * scale,
+    y: offsetY + ty * scale,
+    w: sx * W * scale,
+    h: sy * H * scale,
+  });
+
+  const onScreen = ({ x, y, w, h }) =>
+    x < screenW && y < screenH && x + w > 0 && y + h > 0;
+
+  const drawLevel = ({ sx, sy, x, y }) => {
+    ctx.setTransform(sx * scale * dpr, 0, 0, sy * scale * dpr, x * dpr, y * dpr);
+    paths.forEach(({ path2d, fill, opacity }) => {
+      ctx.globalAlpha = opacity;
+      ctx.fillStyle = fill;
+      ctx.fill(path2d);
+    });
+  };
+
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  for (const { sx, sy, tx, ty } of levels) {
-    const x = offsetX + tx * scale;
-    const y = offsetY + ty * scale;
-    const wPx = sx * W * scale;
-    const hPx = sy * H * scale;
+  pipe(
+    computeLevels(geometry),
+    levels => levels.map(toScreenRect).filter(onScreen),
+    visible => visible.forEach(drawLevel)
+  )(t);
 
-    // Skip levels that are entirely off screen
-    if (x >= screenW || y >= screenH || x + wPx <= 0 || y + hPx <= 0) continue;
-
-    ctx.setTransform(sx * scale * dpr, 0, 0, sy * scale * dpr, x * dpr, y * dpr);
-    for (const p of paths) {
-      ctx.globalAlpha = p.opacity;
-      ctx.fillStyle = p.fill;
-      ctx.fill(p.path2d);
-    }
-  }
   ctx.globalAlpha = 1;
-}
+};
 
-function init() {
-  const svgText = SVG_INLINE;
+// ── Parsing ────────────────────────────────────────────────────
+const parseGeometry = svgText => {
+  const attr = name => {
+    const m = svgText.match(new RegExp(name + '="([0-9.]+)"'));
+    return m ? parseFloat(m[1]) : null;
+  };
+  const vb = (svgText.match(/viewBox="([^"]*)"/) || [, ''])[1]
+    .split(/\s+/).map(Number);
+  const W = attr('width') ?? vb[2];
+  const H = attr('height') ?? vb[3];
+  return { W, H, S_x: W / INNER_W, S_y: H / INNER_H };
+};
 
-  const wMatch = svgText.match(/width="([0-9.]+)"/);
-  const hMatch = svgText.match(/height="([0-9.]+)"/);
-  const vbMatch = svgText.match(/viewBox="([^"]*)"/);
-  let vbW = 0, vbH = 0;
-  if (vbMatch) {
-    const parts = vbMatch[1].split(/\s+/).map(Number);
-    vbW = parts[2]; vbH = parts[3];
-  }
-  W = wMatch ? parseFloat(wMatch[1]) : vbW;
-  H = hMatch ? parseFloat(hMatch[1]) : vbH;
-
-  S_x = W / INNER_W;
-  S_y = H / INNER_H;
-
-  // Parse the SVG's paths into Path2D objects for canvas drawing
-  const cleanSvg = svgText.replace(/<\?xml[^?]*\?>\s*/, '');
+// Parse the SVG's paths into Path2D objects for canvas drawing
+const parsePaths = svgText => {
   const tmp = document.createElement('div');
-  tmp.innerHTML = cleanSvg;
-  for (const el of tmp.querySelectorAll('path')) {
-    paths.push({
-      path2d: new Path2D(el.getAttribute('d')),
-      fill: el.getAttribute('fill') || '#000',
-      opacity: parseFloat(el.getAttribute('opacity') || '1'),
-    });
-  }
+  tmp.innerHTML = svgText.replace(/<\?xml[^?]*\?>\s*/, '');
+  return Array.from(tmp.querySelectorAll('path'), el => ({
+    path2d: new Path2D(el.getAttribute('d')),
+    fill: el.getAttribute('fill') ?? '#000',
+    opacity: parseFloat(el.getAttribute('opacity') ?? '1'),
+  }));
+};
 
+// ── Main ───────────────────────────────────────────────────────
+const init = () => {
   const canvas = document.getElementById('container');
-  const ctx = canvas.getContext('2d');
-  let startTime = null;
+  const render = renderFrame({
+    geometry: parseGeometry(SVG_INLINE),
+    paths: parsePaths(SVG_INLINE),
+    canvas,
+    ctx: canvas.getContext('2d'),
+  });
 
-  function loop(timestamp) {
-    if (!startTime) startTime = timestamp;
-    const elapsed = (timestamp - startTime) / 1000;
-    const t = (elapsed % LOOP_DURATION) / LOOP_DURATION;
-
-    const dpr = window.devicePixelRatio || 1;
-    const screenW = window.innerWidth;
-    const screenH = window.innerHeight;
+  const fitCanvas = (screenW, screenH, dpr) => {
     const pw = Math.round(screenW * dpr);
     const ph = Math.round(screenH * dpr);
     if (canvas.width !== pw || canvas.height !== ph) {
@@ -164,12 +180,17 @@ function init() {
       canvas.style.width = screenW + 'px';
       canvas.style.height = screenH + 'px';
     }
+  };
 
-    renderFrame(t, canvas, ctx, screenW, screenH, dpr);
-    requestAnimationFrame(loop);
-  }
-  requestAnimationFrame(loop);
-}
+  const loop = startTime => timestamp => {
+    const t = (((timestamp - startTime) / 1000) % LOOP_DURATION) / LOOP_DURATION;
+    const dpr = window.devicePixelRatio || 1;
+    fitCanvas(window.innerWidth, window.innerHeight, dpr);
+    render(t, window.innerWidth, window.innerHeight, dpr);
+    requestAnimationFrame(loop(startTime));
+  };
+  requestAnimationFrame(timestamp => loop(timestamp)(timestamp));
+};
 
 init();
 </script>
