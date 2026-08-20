@@ -84,8 +84,8 @@ const canvas = document.getElementById('container');
     const e_y = S_y > 1 ? (Math.pow(S_y, t) - 1) / (S_y - 1) : t;
     const iw = W / S_x;
     const ih = H / S_y;
-    const sx_0 = (iw + (W - iw) * e_x) / iw;
-    const sy_0 = (ih + (H - ih) * e_y) / ih;
+    const sx = (iw + (W - iw) * e_x) / iw;
+    const sy = (ih + (H - ih) * e_y) / ih;
     const scale = Math.max(screenW / W, screenH / H);
 
     ctx.setTransform(1, 0, 0, 1, 0, 0);
@@ -103,10 +103,10 @@ const canvas = document.getElementById('container');
             ty: level.sy * INNER.y + level.ty,
           });
     })([], {
-      sx: sx_0,
-      sy: sy_0,
-      tx: INNER.x * (1 - e_x) - sx_0 * INNER.x,
-      ty: INNER.y * (1 - e_y) - sy_0 * INNER.y,
+      sx,
+      sy,
+      tx: INNER.x * (1 - e_x) - sx * INNER.x,
+      ty: INNER.y * (1 - e_y) - sy * INNER.y,
     })
       .map(({ sx, sy, tx, ty }) => ({
         sx, sy,
