@@ -27,7 +27,7 @@
 </style>
 </head>
 <body>
-<div id="container"></div>
+<canvas id="container"></canvas>
 <div id="overlay">
   <p>*cats (pronounced star-cats) is a perennial clowder of 50 (median, σ=9.84) human-kitties.
 
@@ -47,9 +47,7 @@ const LOOP_DURATION = 10;
 // ── Globals ────────────────────────────────────────────────────
 let W = 0, H = 0;
 let S_x = 0, S_y = 0;
-let svgTemplate = null; // parsed SVG DOM element used as clone source
-const pool = [];        // reusable {svg, bucket} elements
-const MAX_POOL = 20;
+let paths = [];   // [{path2d, fill, opacity}] parsed from the SVG, in paint order
 
 function computeLevels(t) {
   const iw = W / S_x;
@@ -84,30 +82,21 @@ function computeLevels(t) {
   return levels;
 }
 
-function renderFrame(t, container, screenW, screenH) {
+// Everything is drawn as canvas paths: resolution-independent (stays sharp at
+// any zoom, like the SVG did), but with no DOM layout, no compositor
+// pixel-snapping, and — unlike <svg> elements — no synchronous re-raster when
+// a layer's backing size changes, which was the source of the periodic hitch.
+function renderFrame(t, canvas, ctx, screenW, screenH, dpr) {
   const levels = computeLevels(t);
 
   const scale = Math.max(screenW / W, screenH / H);
   const offsetX = (screenW - W * scale) / 2;
   const offsetY = (screenH - H * scale) / 2;
 
-  // Ensure we have enough pooled elements
-  while (pool.length < levels.length && pool.length < MAX_POOL) {
-    const svg = svgTemplate.cloneNode(true);
-    svg.style.position = 'absolute';
-    svg.style.left = '0';
-    svg.style.top = '0';
-    svg.style.transformOrigin = '0 0';
-    svg.style.willChange = 'transform';
-    container.appendChild(svg);
-    pool.push({ svg, bucket: 0 });
-  }
+  ctx.setTransform(1, 0, 0, 1, 0, 0);
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  let i = 0;
   for (const { sx, sy, tx, ty } of levels) {
-    if (i >= pool.length) break;
-
-    // Exact screen-space rect for this level
     const x = offsetX + tx * scale;
     const y = offsetY + ty * scale;
     const wPx = sx * W * scale;
@@ -116,34 +105,14 @@ function renderFrame(t, container, screenW, screenH) {
     // Skip levels that are entirely off screen
     if (x >= screenW || y >= screenH || x + wPx <= 0 || y + hPx <= 0) continue;
 
-    const slot = pool[i];
-
-    // Rasterize the SVG at the next power-of-two size above its on-screen
-    // size, and bridge the remainder with a transform. Changing width/height
-    // is a layout operation — it snaps to the pixel grid and forces a
-    // re-raster, which is what caused the per-frame jitter — so it now only
-    // happens a few times per loop. Every frame in between is a pure
-    // compositor transform, which moves with subpixel precision. The
-    // transform only ever scales DOWN (0.5–1x), so it stays sharp.
-    const bucket = Math.pow(2, Math.ceil(Math.log2(wPx / W)));
-    if (bucket !== slot.bucket) {
-      slot.bucket = bucket;
-      slot.svg.style.width = (W * bucket) + 'px';
-      slot.svg.style.height = (H * bucket) + 'px';
+    ctx.setTransform(sx * scale * dpr, 0, 0, sy * scale * dpr, x * dpr, y * dpr);
+    for (const p of paths) {
+      ctx.globalAlpha = p.opacity;
+      ctx.fillStyle = p.fill;
+      ctx.fill(p.path2d);
     }
-    const s_x = wPx / (W * bucket);
-    const s_y = hPx / (H * bucket);
-    slot.svg.style.transform =
-      'translate(' + x + 'px,' + y + 'px) scale(' + s_x + ',' + s_y + ')';
-    slot.svg.style.display = 'block';
-
-    i++;
   }
-
-  // Hide unused pool elements
-  for (; i < pool.length; i++) {
-    pool[i].svg.style.display = 'none';
-  }
+  ctx.globalAlpha = 1;
 }
 
 function init() {
@@ -163,22 +132,40 @@ function init() {
   S_x = W / INNER_W;
   S_y = H / INNER_H;
 
-  // Parse SVG into a DOM element for cloning (inline SVGs render as vectors in all browsers)
-  // Strip XML declaration and use innerHTML — more forgiving than DOMParser with namespaces
+  // Parse the SVG's paths into Path2D objects for canvas drawing
   const cleanSvg = svgText.replace(/<\?xml[^?]*\?>\s*/, '');
   const tmp = document.createElement('div');
   tmp.innerHTML = cleanSvg;
-  svgTemplate = tmp.querySelector('svg');
+  for (const el of tmp.querySelectorAll('path')) {
+    paths.push({
+      path2d: new Path2D(el.getAttribute('d')),
+      fill: el.getAttribute('fill') || '#000',
+      opacity: parseFloat(el.getAttribute('opacity') || '1'),
+    });
+  }
 
-  const container = document.getElementById('container');
+  const canvas = document.getElementById('container');
+  const ctx = canvas.getContext('2d');
   let startTime = null;
-
 
   function loop(timestamp) {
     if (!startTime) startTime = timestamp;
     const elapsed = (timestamp - startTime) / 1000;
     const t = (elapsed % LOOP_DURATION) / LOOP_DURATION;
-    renderFrame(t, container, window.innerWidth, window.innerHeight);
+
+    const dpr = window.devicePixelRatio || 1;
+    const screenW = window.innerWidth;
+    const screenH = window.innerHeight;
+    const pw = Math.round(screenW * dpr);
+    const ph = Math.round(screenH * dpr);
+    if (canvas.width !== pw || canvas.height !== ph) {
+      canvas.width = pw;
+      canvas.height = ph;
+      canvas.style.width = screenW + 'px';
+      canvas.style.height = screenH + 'px';
+    }
+
+    renderFrame(t, canvas, ctx, screenW, screenH, dpr);
     requestAnimationFrame(loop);
   }
   requestAnimationFrame(loop);
