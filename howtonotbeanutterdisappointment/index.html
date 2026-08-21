@@ -337,27 +337,27 @@
 
 <script>
 (function() {
-  var KEY = 'cats2026_auth';
+  var KEY = 'cats2026_auth'
   if (sessionStorage.getItem(KEY) === 'true') {
-    document.getElementById('pwGate').classList.add('hidden');
-    document.getElementById('pageContent').classList.add('visible');
+    document.getElementById('pwGate').classList.add('hidden')
+    document.getElementById('pageContent').classList.add('visible')
   }
   document.getElementById('pwForm').addEventListener('submit', function() {
-    var val = document.getElementById('pwInput').value;
+    var val = document.getElementById('pwInput').value
     if (val === 'newcat2026') {
-      sessionStorage.setItem(KEY, 'true');
-      document.getElementById('pwGate').classList.add('hidden');
-      document.getElementById('pageContent').classList.add('visible');
+      sessionStorage.setItem(KEY, 'true')
+      document.getElementById('pwGate').classList.add('hidden')
+      document.getElementById('pageContent').classList.add('visible')
     } else {
-      document.getElementById('pwError').textContent = 'Wrong password. Try again.';
-      document.getElementById('pwInput').value = '';
-      document.getElementById('pwInput').focus();
+      document.getElementById('pwError').textContent = 'Wrong password. Try again.'
+      document.getElementById('pwInput').value = ''
+      document.getElementById('pwInput').focus()
     }
-  });
+  })
   document.getElementById('pwBtn').addEventListener('click', function() {
-    document.getElementById('pwForm').dispatchEvent(new Event('submit'));
-  });
-})();
+    document.getElementById('pwForm').dispatchEvent(new Event('submit'))
+  })
+})()
 </script>
 
 </body>
