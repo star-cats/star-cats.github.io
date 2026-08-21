@@ -26,15 +26,27 @@
   }
   #overlay a.sched {
     display: inline-block;
-    margin-top: 1rem;
+    margin-top: 1.2rem;
+    padding: 0.5rem 1rem;
     font-family: monospace;
-    font-size: 1.5rem;
-    color: #00ffff;
-    text-decoration: underline;
-    text-underline-offset: 4px;
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #000;
+    background: #00ffff;
+    text-decoration: none;
     pointer-events: auto;
+    box-shadow: 0 0 12px #00ffff, 0 0 36px rgba(0, 255, 255, 0.6);
+    animation: sched-pulse 2s ease-in-out infinite;
   }
-  #overlay a.sched:hover { color: #ffffff; }
+  #overlay a.sched:hover {
+    background: #ffffff;
+    box-shadow: 0 0 16px #ffffff, 0 0 48px rgba(255, 255, 255, 0.8);
+    animation: none;
+  }
+  @keyframes sched-pulse {
+    0%, 100% { box-shadow: 0 0 12px #00ffff, 0 0 36px rgba(0, 255, 255, 0.6); }
+    50%      { box-shadow: 0 0 20px #00ffff, 0 0 60px rgba(0, 255, 255, 0.9); }
+  }
 </style>
 </head>
 <body>
@@ -44,7 +56,7 @@
 
 We will be at Burning Man 2026.
 4:00 &amp; Esplanade
-<a class="sched" href="/schedule/">▶ 2026 music schedule</a>
+<a class="sched" href="/schedule/">▶ *cats schedule</a>
 </p>
 </div>
 <script>
