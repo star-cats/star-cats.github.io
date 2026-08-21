@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>*cats — 2026 Music Schedule</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>✳</text></svg>">
+<meta property="og:title" content="*cats — 2026 Music Schedule">
+<meta property="og:description" content="Music at *cats camp — 4:00 &amp; Esplanade, Burning Man 2026. Every night, sunset to late.">
+<meta property="og:type" content="website">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=VT323&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0d0c0b;
+    color: #f0ece4;
+    font-family: 'Space Mono', monospace;
+    font-size: 14px;
+    line-height: 1.7;
+  }
+
+  a { color: #d4a8e8; }
+  a:hover { color: #f0d0ff; }
+
+  /* NAV */
+  .nav {
+    position: sticky;
+    top: 0;
+    background: #0d0c0b;
+    border-bottom: 1px solid #2a2826;
+    padding: 14px 40px;
+    display: flex;
+    align-items: baseline;
+    gap: 16px;
+    z-index: 100;
+    flex-wrap: wrap;
+  }
+  .nav-title {
+    font-family: 'VT323', monospace;
+    font-size: 26px;
+    color: #fff;
+    text-decoration: none;
+    margin-right: 16px;
+  }
+  .nav-sub { color: #8a857c; font-size: 13px; }
+
+  /* HERO */
+  .hero {
+    text-align: center;
+    padding: 56px 20px 36px;
+    border-bottom: 1px solid #2a2826;
+  }
+  .hero h1 {
+    font-family: 'VT323', monospace;
+    font-size: 64px;
+    font-weight: 400;
+    color: #fff;
+    line-height: 1.1;
+    text-shadow: 0 0 24px rgba(212, 168, 232, 0.45);
+  }
+  .hero .where {
+    display: inline-block;
+    margin-top: 14px;
+    padding: 4px 14px;
+    border: 1px solid #6c4a86;
+    border-radius: 999px;
+    color: #d4a8e8;
+    font-size: 13px;
+  }
+  .hero .note {
+    margin-top: 16px;
+    color: #8a857c;
+    font-size: 12.5px;
+  }
+
+  /* SCHEDULE */
+  .container {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 20px 20px 80px;
+  }
+  .day {
+    margin-top: 44px;
+  }
+  .day h2 {
+    font-family: 'VT323', monospace;
+    font-size: 40px;
+    font-weight: 400;
+    color: #ffb84d;
+    text-shadow: 0 0 18px rgba(255, 132, 32, 0.35);
+    margin-bottom: 12px;
+  }
+  .slots { list-style: none; }
+  .slots li {
+    display: flex;
+    gap: 18px;
+    padding: 7px 0;
+    border-bottom: 1px dotted #262421;
+    align-items: baseline;
+  }
+  .time {
+    flex: 0 0 11.5em;
+    color: #8a857c;
+    white-space: nowrap;
+    font-size: 13px;
+  }
+  .act {
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .act a { text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  .act .nolink { color: #f0ece4; }
+
+  footer {
+    border-top: 1px solid #2a2826;
+    text-align: center;
+    padding: 28px 20px 48px;
+    color: #8a857c;
+    font-size: 12.5px;
+  }
+  footer a { color: #d4a8e8; }
+
+  @media (max-width: 540px) {
+    .hero h1 { font-size: 44px; }
+    .slots li { flex-direction: column; gap: 0; padding: 10px 0; }
+    .time { flex: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a class="nav-title" href="/">*cats</a>
+  <span class="nav-sub">Burning Man 2026 &mdash; 4:00 &amp; Esplanade</span>
+</nav>
+
+<div class="hero">
+  <h1>✳ Music Schedule</h1>
+  <div class="where">4:00 &amp; Esplanade &middot; every night, sunset to late</div>
+  <div class="note">All times are playa time (and playa time is a suggestion).</div>
+</div>
+
+<div class="container">
+
+  <div class="day" id="monday">
+    <h2>Monday</h2>
+    <ul class="slots">
+      <li><span class="time">7:30 &ndash; 8:00pm</span><span class="act"><span class="nolink">Divastation</span></span></li>
+      <li><span class="time">8:00pm &ndash; 1:00am</span><span class="act"><a href="https://soundcloud.com/lukelomen">Luke Lomen</a></span></li>
+      <li><span class="time">1:00 &ndash; 2:30am</span><span class="act"><a href="https://www.instagram.com/milladmusic/">Millad</a></span></li>
+    </ul>
+  </div>
+
+  <div class="day" id="tuesday">
+    <h2>Tuesday</h2>
+    <ul class="slots">
+      <li><span class="time">7:30 &ndash; 8:00pm</span><span class="act"><span class="nolink">*grass</span></span></li>
+      <li><span class="time">8:00 &ndash; 9:30pm</span><span class="act"><a href="https://oldmanofthewoods.rocks">Old Man of the Woods</a></span></li>
+      <li><span class="time">9:30 &ndash; 10:30pm</span><span class="act"><a href="https://soundcloud.com/rhi-mix">RHi/MiX</a></span></li>
+      <li><span class="time">10:30pm &ndash; 12:00am</span><span class="act"><a href="https://soundcloud.com/deejayipyap">Deejay YipYap</a></span></li>
+      <li><span class="time">12:00 &ndash; 1:00am</span><span class="act"><a href="https://soundcloud.com/cygondnb">Cygon</a></span></li>
+      <li><span class="time">1:00 &ndash; 2:30am</span><span class="act"><a href="https://soundcloud.com/lightmotif_music">Lightmotif</a></span></li>
+      <li><span class="time">2:30 &ndash; 4:00am</span><span class="act"><a href="https://soundcloud.com/djcheetatah">CHEETATAH</a></span></li>
+    </ul>
+  </div>
+
+  <div class="day" id="wednesday">
+    <h2>Wednesday</h2>
+    <ul class="slots">
+      <li><span class="time">7:00 &ndash; 8:00pm</span><span class="act"><a href="https://www.instagram.com/mortem_mons">Taser Knife Fights</a></span></li>
+      <li><span class="time">8:00 &ndash; 9:30pm</span><span class="act"><a href="https://soundcloud.com/solarsystem_music">Solar System</a></span></li>
+      <li><span class="time">9:30 &ndash; 11:00pm</span><span class="act"><a href="https://on.soundcloud.com/RKjdcC7UP0mCa56Yf1">Axelrod</a></span></li>
+      <li><span class="time">11:00pm &ndash; 12:30am</span><span class="act"><a href="https://soundcloud.com/n0t-h3r3-353610100">NoT H3R3</a></span></li>
+      <li><span class="time">12:30 &ndash; 1:30am</span><span class="act"><a href="https://soundcloud.com/oscapus">Oscapus</a></span></li>
+      <li><span class="time">1:30 &ndash; 2:30am</span><span class="act"><a href="https://on.soundcloud.com/GE1tiNpGZqwmi1EQks">Truprwulf</a></span></li>
+      <li><span class="time">2:30 &ndash; 4:00am</span><span class="act"><a href="https://partiful.com/e/kmacbJJBzENABVCekYjz">Secret Rehearsal</a></span></li>
+    </ul>
+  </div>
+
+  <div class="day" id="thursday">
+    <h2>Thursday</h2>
+    <ul class="slots">
+      <li><span class="time">7:00 &ndash; 8:00pm</span><span class="act"><span class="nolink">Late For Dinner</span></span></li>
+      <li><span class="time">8:00 &ndash; 9:00pm</span><span class="act"><a href="https://www.instagram.com/saunaplants">SAUNAPLANTS</a></span></li>
+      <li><span class="time">9:00pm &ndash; 12:00am</span><span class="act"><span class="nolink">Cataoke with Chex</span></span></li>
+      <li><span class="time">12:00 &ndash; 1:30am</span><span class="act"><a href="https://soundcloud.com/balt_tunes">Baltazar</a></span></li>
+      <li><span class="time">1:30 &ndash; 2:30am</span><span class="act"><a href="https://on.soundcloud.com/eZyFcXmaYzFtvOCECN">Lantern Jack</a></span></li>
+      <li><span class="time">2:30 &ndash; 4:00am</span><span class="act"><a href="https://soundcloud.com/cheftba">More TBA</a></span></li>
+    </ul>
+  </div>
+
+  <div class="day" id="friday">
+    <h2>Friday</h2>
+    <ul class="slots">
+      <li><span class="time">7:00 &ndash; 7:30pm</span><span class="act"><span class="nolink">Sam Costigan</span></span></li>
+      <li><span class="time">7:30 &ndash; 8:00pm</span><span class="act"><span class="nolink">RoyGBIV</span></span></li>
+      <li><span class="time">8:00 &ndash; 9:30pm</span><span class="act"><a href="https://soundcloud.com/lukelomen">Luke Lomen</a></span></li>
+      <li><span class="time">9:30 &ndash; 11:00pm</span><span class="act"><a href="https://soundcloud.com/matthew_james">Matthew Farrer</a></span></li>
+      <li><span class="time">11:15pm &ndash; 12:00am</span><span class="act"><a href="https://open.spotify.com/artist/1MLL7w9FBopQQrYgGhIwK9">BAYUE</a></span></li>
+      <li><span class="time">12:00 &ndash; 1:00am</span><span class="act"><a href="https://soundcloud.com/jalayamusic">Jalaya</a></span></li>
+      <li><span class="time">1:00 &ndash; 2:30am</span><span class="act"><a href="https://soundcloud.com/attygmusic">Atty G</a></span></li>
+      <li><span class="time">2:30 &ndash; 4:00am</span><span class="act"><a href="https://soundcloud.com/salimbeni">William Salimbeni</a></span></li>
+      <li><span class="time">4:00 &ndash; 5:00am</span><span class="act"><a href="https://www.instagram.com/frontbait">Front Bait</a></span></li>
+      <li><span class="time">5:00 &ndash; 7:00am</span><span class="act"><a href="https://www.instagram.com/vtlx.me">VTLX</a></span></li>
+    </ul>
+  </div>
+
+  <div class="day" id="saturday">
+    <h2>Saturday</h2>
+    <ul class="slots">
+      <li><span class="time">10:30pm &ndash; 12:00am</span><span class="act"><a href="https://soundcloud.com/grumpy-goose123">Madder Daddy</a></span></li>
+      <li><span class="time">12:00 &ndash; 1:00am</span><span class="act"><a href="https://soundcloud.com/hearthclub">Zip Tie!</a></span></li>
+      <li><span class="time">1:00 &ndash; 2:00am</span><span class="act"><a href="https://soundcloud.com/weirdedout">Weirded Out</a></span></li>
+    </ul>
+  </div>
+
+</div>
+
+<footer>
+  <a href="/">&larr; cats.camp</a> &middot; lineup by the *cats music do-ocracy &middot; subject to dust, whim, and playa reality
+</footer>
+
+</body>
+</html>
